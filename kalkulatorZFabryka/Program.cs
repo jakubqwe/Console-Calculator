@@ -7,16 +7,16 @@ using System.Threading.Tasks;
 
 namespace calculator
 {
-    public enum Dzialania
+    public enum Operations
     {
-        Nieznany,
-        LewyNawias,
-        PrawyNawias,
-        Dodawanie,
-        Odejmowanie,
-        Dzielenie,
-        Mnozenie,
-        Potegowanie
+        Unknown,
+        LeftBracket,
+        RightBracket,
+        Addition,
+        Subtraction,
+        Division,
+        Multiplication,
+        Power
     }
     public enum Funkcje
     {
@@ -25,15 +25,15 @@ namespace calculator
     }
     class Program
     {
-        static bool ComparePriority(Dzialania operatorToCompare, Dzialania comparingOperator)
+        static bool ComparePriority(Operations operatorToCompare, Operations comparingOperator)
         {
-            if(operatorToCompare == Dzialania.Dodawanie || operatorToCompare == Dzialania.Odejmowanie)
+            if(operatorToCompare == Operations.Addition || operatorToCompare == Operations.Subtraction)
             {
                 return true;
             }
-            if (operatorToCompare == Dzialania.Mnozenie || operatorToCompare == Dzialania.Dzielenie)
+            if (operatorToCompare == Operations.Multiplication || operatorToCompare == Operations.Division)
             {
-                if (comparingOperator >= Dzialania.Dzielenie)
+                if (comparingOperator >= Operations.Division)
                 {
                     return true;
                 }
@@ -42,9 +42,9 @@ namespace calculator
                     return false;
                 }
             }
-            if (operatorToCompare == Dzialania.Potegowanie)
+            if (operatorToCompare == Operations.Power)
             {
-                if (comparingOperator >= Dzialania.Potegowanie)
+                if (comparingOperator >= Operations.Power)
                 {
                     return true;
                 }
@@ -55,26 +55,26 @@ namespace calculator
             }
             return false;
         }
-        public static List<object> KonwertujNaONP(string s)
+        public static List<object> ConvertToRPN(string s)
         {
-            List<object> onp = new List<object>();
-            Stack<Dzialania> operatorStack = new Stack<Dzialania>();
+            List<object> rpn = new List<object>();
+            Stack<Operations> operatorStack = new Stack<Operations>();
             for(int i = 0; i<s.Length; i++)
             {
                 if (char.IsDigit(s[i]))
                 {
-                    onp.Add(s.OdczytajLiczbe(ref i));
+                    rpn.Add(s.OdczytajLiczbe(ref i));
 
                 }
                 else if (s[i] == '(')
                 {
-                    operatorStack.Push(Dzialania.LewyNawias);
+                    operatorStack.Push(Operations.LeftBracket);
                 }
                 else if (s[i] == ')')
                 {
-                    while (operatorStack.Peek() != Dzialania.LewyNawias)
+                    while (operatorStack.Peek() != Operations.LeftBracket)
                     {
-                        onp.Add(operatorStack.Pop());
+                        rpn.Add(operatorStack.Pop());
                     }
                     operatorStack.Pop();
                 }
@@ -85,57 +85,57 @@ namespace calculator
                 else if(!char.IsWhiteSpace(s[i]) && s[i] != '.')
                 {
                     while(operatorStack.Count != 0 && 
-                          operatorStack.Peek() != Dzialania.LewyNawias && 
-                          ComparePriority(s.ToDzialania(i), operatorStack.Peek()))
+                          operatorStack.Peek() != Operations.LeftBracket && 
+                          ComparePriority(s.ToOperations(i), operatorStack.Peek()))
                     {
-                        onp.Add(operatorStack.Pop());
+                        rpn.Add(operatorStack.Pop());
                     }
-                    operatorStack.Push(s.ToDzialania(i));
+                    operatorStack.Push(s.ToOperations(i));
                 }
             }
             while (operatorStack.Count != 0)
             {
-                onp.Add(operatorStack.Pop());
+                rpn.Add(operatorStack.Pop());
             }
-            return onp;
+            return rpn;
         }
         public static decimal Calculate(string s)
         {
-            List<object> onp = KonwertujNaONP(s);
+            List<object> rpn = ConvertToRPN(s);
             Stack<decimal> numberStack = new Stack<decimal>();
-            foreach(var token in onp)
+            foreach(var token in rpn)
             {
                
                 if (token.GetType() == typeof(decimal))
                 {
                     numberStack.Push((decimal)token);
                 }
-                if(token.GetType() == typeof(Dzialania))
+                if(token.GetType() == typeof(Operations))
                 {
                     decimal a = numberStack.Pop();
                     decimal b = numberStack.Pop();
-                    numberStack.Push(DoOperation(b, a, (Dzialania)token));
+                    numberStack.Push(DoOperation(b, a, (Operations)token));
                 }
             }
             return numberStack.Pop();
         }
-        public static decimal DoOperation(decimal a, decimal b, Dzialania dzialanie)
+        public static decimal DoOperation(decimal a, decimal b, Operations dzialanie)
         {
             //Strategia 
             switch (dzialanie)
             {
-                case Dzialania.Dodawanie:
+                case Operations.Addition:
                     return a + b;
-                case Dzialania.Odejmowanie:
+                case Operations.Subtraction:
                     return a - b;
-                case Dzialania.Mnozenie:
+                case Operations.Multiplication:
                     return a * b;
-                case Dzialania.Dzielenie:
+                case Operations.Division:
                     return a / b;
-                case Dzialania.Potegowanie:
+                case Operations.Power:
                     return (decimal)Math.Pow((double)a, (double)b);
                 default:
-                    return decimal.Parse("naucz sie pisac dzialania");
+                    return decimal.Parse("naucz sie pisac Operations");
             }
             
         }

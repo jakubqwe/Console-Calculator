@@ -20,31 +20,31 @@ namespace calculator
             return decimal.Parse(liczba);
         }
 
-        public static Dzialania ToDzialania(this string s, int pos)
+        public static Operations ToOperations(this string s, int pos)
         {
             switch (s[pos])
             {
                 case '+':
-                    return Dzialania.Dodawanie;
+                    return Operations.Addition;
                 case '-':
-                    return Dzialania.Odejmowanie;
+                    return Operations.Subtraction;
                 case '*':
-                    return Dzialania.Mnozenie;
+                    return Operations.Multiplication;
                 case '/':
                 case ':':
-                    return Dzialania.Dzielenie;
+                    return Operations.Division;
                 case '^':
-                    return Dzialania.Potegowanie;
+                    return Operations.Power;
                 case '[':
                 case '{':
                 case '(':
-                    return Dzialania.LewyNawias;
+                    return Operations.LeftBracket;
                 case ']':
                 case '}':
                 case ')':
-                    return Dzialania.PrawyNawias;
+                    return Operations.RightBracket;
                 default:
-                    return Dzialania.Nieznany;
+                    return Operations.Unknown;
             }
         }
         
