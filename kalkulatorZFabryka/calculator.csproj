@@ -103,5 +103,11 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OperatorsDLL\OperatorsDLL.csproj">
+      <Project>{d2e8753d-b402-41a4-91fc-c935bf821d22}</Project>
+      <Name>OperatorsDLL</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -7,72 +7,28 @@ using System.Threading.Tasks;
 
 namespace calculator
 {
-    public enum Operations
+    
+    public class Program
     {
-        Unknown,
-        LeftBracket,
-        RightBracket,
-        Addition,
-        Subtraction,
-        Division,
-        Multiplication,
-        Power
-    }
-    public enum Funkcje
-    {
-        Zmienna,
-        Pi
-    }
-    class Program
-    {
-        static bool ComparePriority(Operations operatorToCompare, Operations comparingOperator)
-        {
-            if(operatorToCompare == Operations.Addition || operatorToCompare == Operations.Subtraction)
-            {
-                return true;
-            }
-            if (operatorToCompare == Operations.Multiplication || operatorToCompare == Operations.Division)
-            {
-                if (comparingOperator >= Operations.Division)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            if (operatorToCompare == Operations.Power)
-            {
-                if (comparingOperator >= Operations.Power)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            return false;
-        }
+        
         public static List<object> ConvertToRPN(string s)
         {
             List<object> rpn = new List<object>();
-            Stack<Operations> operatorStack = new Stack<Operations>();
+            Stack<IOperator> operatorStack = new Stack<IOperator>();
             for(int i = 0; i<s.Length; i++)
             {
                 if (char.IsDigit(s[i]))
                 {
-                    rpn.Add(s.OdczytajLiczbe(ref i));
+                    rpn.Add(s.ReadNumber(ref i));
 
                 }
                 else if (s[i] == '(')
                 {
-                    operatorStack.Push(Operations.LeftBracket);
+                    operatorStack.Push(OperatorFactory.Create<LeftBracket>());
                 }
                 else if (s[i] == ')')
                 {
-                    while (operatorStack.Peek() != Operations.LeftBracket)
+                    while (operatorStack.Peek().GetType() != typeof(LeftBracket))
                     {
                         rpn.Add(operatorStack.Pop());
                     }
@@ -84,13 +40,13 @@ namespace calculator
                 }
                 else if(!char.IsWhiteSpace(s[i]) && s[i] != '.')
                 {
-                    while(operatorStack.Count != 0 && 
-                          operatorStack.Peek() != Operations.LeftBracket && 
-                          ComparePriority(s.ToOperations(i), operatorStack.Peek()))
+                    while (operatorStack.Count != 0 &&
+                          operatorStack.Peek() != OperatorFactory.Create<LeftBracket>() &&
+                          s.ToOperator(i).ComparePriority(operatorStack.Peek()))
                     {
                         rpn.Add(operatorStack.Pop());
                     }
-                    operatorStack.Push(s.ToOperations(i));
+                    operatorStack.Push(s.ToOperator(i));
                 }
             }
             while (operatorStack.Count != 0)
@@ -110,34 +66,15 @@ namespace calculator
                 {
                     numberStack.Push((decimal)token);
                 }
-                if(token.GetType() == typeof(Operations))
+                if(token.GetType().GetInterface("IExecutableOperator") == typeof(IExecutableOperator))
                 {
+                    var Operator = (IExecutableOperator)token;
                     decimal a = numberStack.Pop();
                     decimal b = numberStack.Pop();
-                    numberStack.Push(DoOperation(b, a, (Operations)token));
+                    numberStack.Push(Operator.CalculateOperator(b, a));
                 }
             }
             return numberStack.Pop();
-        }
-        public static decimal DoOperation(decimal a, decimal b, Operations dzialanie)
-        {
-            //Strategia 
-            switch (dzialanie)
-            {
-                case Operations.Addition:
-                    return a + b;
-                case Operations.Subtraction:
-                    return a - b;
-                case Operations.Multiplication:
-                    return a * b;
-                case Operations.Division:
-                    return a / b;
-                case Operations.Power:
-                    return (decimal)Math.Pow((double)a, (double)b);
-                default:
-                    return decimal.Parse("naucz sie pisac Operations");
-            }
-            
         }
         static void Main(string[] args)
         {
