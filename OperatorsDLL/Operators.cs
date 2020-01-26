@@ -6,7 +6,7 @@ namespace calculator
     public interface IOperator
     {
         uint Weight { get; }
-
+       
     }
     public interface IExecutableOperator : IOperator
     {

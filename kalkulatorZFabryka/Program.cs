@@ -41,7 +41,7 @@ namespace calculator
                 else if(!char.IsWhiteSpace(s[i]) && s[i] != '.')
                 {
                     while (operatorStack.Count != 0 &&
-                          operatorStack.Peek() != OperatorFactory.Create<LeftBracket>() &&
+                          operatorStack.Peek().GetType() != typeof(LeftBracket) &&
                           s.ToOperator(i).ComparePriority(operatorStack.Peek()))
                     {
                         rpn.Add(operatorStack.Pop());
