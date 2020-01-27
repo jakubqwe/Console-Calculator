@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace calculator
+namespace OperatorsDLL
 {
 
     public interface IOperator
@@ -13,7 +13,7 @@ namespace calculator
         decimal CalculateOperator(decimal a, decimal b);
 
     }
-
+    
     public class Default : IOperator
     {
         public uint Weight => 0;
