@@ -19,6 +19,16 @@ namespace calculator
             startPos += i - startPos - 1;
             return decimal.Parse(liczba);
         }
+        public static string ReadFunction(this string s, ref int startPos)
+        {
+            int i;
 
+
+            for (i = startPos; i != s.Length && char.IsLetter(s[i]); i++) ;
+
+            var func = s.Substring(startPos, i - startPos);
+            startPos += i - startPos - 1;
+            return func;
+        }
     }
 }

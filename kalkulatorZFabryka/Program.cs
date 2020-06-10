@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using OperatorsDLL;
 
 namespace calculator
 {
@@ -36,12 +36,12 @@ namespace calculator
                 }
                 else if (char.IsLetter(s[i]))
                 {
-
+                    operatorStack.Push(OperatorParser.ToFunction(s.ReadFunction(ref i)));
                 }
                 else if(!char.IsWhiteSpace(s[i]) && s[i] != '.')
                 {
                     while (operatorStack.Count != 0 &&
-                          operatorStack.Peek() != OperatorFactory.Create<LeftBracket>() &&
+                          operatorStack.Peek().GetType() != typeof(LeftBracket) &&
                           s.ToOperator(i).ComparePriority(operatorStack.Peek()))
                     {
                         rpn.Add(operatorStack.Pop());
@@ -62,22 +62,29 @@ namespace calculator
             foreach(var token in rpn)
             {
                
-                if (token.GetType() == typeof(decimal))
+                if (token is decimal)
                 {
                     numberStack.Push((decimal)token);
                 }
-                if(token.GetType().GetInterface("IExecutableOperator") == typeof(IExecutableOperator))
+                if(token is IExecutableOperator)
                 {
                     var Operator = (IExecutableOperator)token;
-                    decimal a = numberStack.Pop();
-                    decimal b = numberStack.Pop();
+                    var a = numberStack.Pop();
+                    var b = numberStack.Pop();
                     numberStack.Push(Operator.CalculateOperator(b, a));
+                }
+                if(token is IFunction)
+                {
+                    var Function = (IFunction)token;
+                    var a = numberStack.Pop();
+                    numberStack.Push(Function.CalculateFunction(a));
                 }
             }
             return numberStack.Pop();
         }
         static void Main(string[] args)
         {
+            System.Globalization.CultureInfo.DefaultThreadCurrentCulture = new System.Globalization.CultureInfo("en-US");
             while (true) {
                 string s = Console.ReadLine();
                 try
@@ -87,6 +94,7 @@ namespace calculator
                 catch(Exception ex)
                 {
                     Console.WriteLine(ex.Message);
+                    //Console.WriteLine(ex.GetBaseException());
                 }
             }
         }

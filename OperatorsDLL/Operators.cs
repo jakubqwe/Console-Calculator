@@ -1,19 +1,25 @@
 ﻿using System;
+using System.Reflection;
+using System.Linq;
 
-namespace calculator
+namespace OperatorsDLL
 {
 
     public interface IOperator
     {
         uint Weight { get; }
-
+       
     }
     public interface IExecutableOperator : IOperator
     {
         decimal CalculateOperator(decimal a, decimal b);
 
     }
-
+    public interface IFunction : IOperator
+    {
+        decimal CalculateFunction(decimal a);
+    }
+    
     public class Default : IOperator
     {
         public uint Weight => 0;
@@ -69,7 +75,46 @@ namespace calculator
 
         public decimal CalculateOperator(decimal a, decimal b)
         {
-            return (decimal)Math.Pow((double)a, (double)b); ;
+            return (decimal)Math.Pow((double)a, (double)b);
+        }
+    }
+
+    public class Sinus : IFunction
+    {
+        public uint Weight => 4;
+
+        public decimal CalculateFunction(decimal a)
+        {
+            return (decimal)Math.Sin((double)a);
+        }
+    }
+    public class Cosinus : IFunction
+    {
+        public uint Weight => 4;
+
+        public decimal CalculateFunction(decimal a)
+        {
+            return (decimal)Math.Cos((double)a);
+        }
+    }
+
+    public class Tangent : IFunction
+    {
+        public uint Weight => 4;
+
+        public decimal CalculateFunction(decimal a)
+        {
+            return (decimal)Math.Tan((double)a);
+        }
+    }
+
+    public class Cotangent : IFunction
+    {
+        public uint Weight => 4;
+
+        public decimal CalculateFunction(decimal a)
+        {
+            return 1/(decimal)Math.Tan((double)a);
         }
     }
 
@@ -83,6 +128,13 @@ namespace calculator
     }
     public static class OperatorFactory
     {
+
+        public static void Test()
+        {
+            var opTypes = Assembly.GetExecutingAssembly().DefinedTypes.Where(x => typeof(IOperator).IsAssignableFrom(x));
+            var dic = opTypes.Select(x => (IOperator)Activator.CreateInstance(x)).ToDictionary(x => x.Weight, x => x);
+        }
+
         public static T Create<T>() where T : IOperator, new()
         {
             return new T();
@@ -143,6 +195,24 @@ namespace calculator
                 {
                     return false;
                 }
+            }
+        }
+        public static IFunction ToFunction(this string s)
+        {
+            switch (s)
+            {
+                case "sin":
+                    return OperatorFactory.Create<Sinus>();
+                case "cos":
+                    return OperatorFactory.Create<Cosinus>();
+                case "tag":
+                case "tg":
+                    return OperatorFactory.Create<Tangent>();
+                case "ctg":
+                case "cot":
+                    return OperatorFactory.Create<Cotangent>();
+                default:
+                    return (IFunction)OperatorFactory.Create<Default>();
             }
         }
     }
