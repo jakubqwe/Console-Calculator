@@ -15,15 +15,32 @@ namespace OperatorsDLL
         decimal CalculateOperator(decimal a, decimal b);
 
     }
-    public interface IFunction : IOperator
+    public interface IOneArgFunction : IOperator
     {
         decimal CalculateFunction(decimal a);
+    }
+
+    public interface IConstant : IOperator
+    {
+        decimal Value { get; }
     }
     
     public class Default : IOperator
     {
         public uint Weight => 0;
     }
+
+    public class Pi : IConstant
+    {
+        public uint Weight => 4;
+        public decimal Value => 3.1415926535897932384626433832m;
+    }
+    public class EulersNumber : IConstant
+    {
+        public uint Weight => 4;
+        public decimal Value => (decimal)Math.E;
+    }
+
     public class Addition : IExecutableOperator
     {
         public uint Weight => 2;
@@ -79,18 +96,18 @@ namespace OperatorsDLL
         }
     }
 
-    public class Sinus : IFunction
+    public class Sinus : IOneArgFunction
     {
-        public uint Weight => 4;
+        public uint Weight => 5;
 
         public decimal CalculateFunction(decimal a)
         {
             return (decimal)Math.Sin((double)a);
         }
     }
-    public class Cosinus : IFunction
+    public class Cosinus : IOneArgFunction
     {
-        public uint Weight => 4;
+        public uint Weight => 5;
 
         public decimal CalculateFunction(decimal a)
         {
@@ -98,9 +115,9 @@ namespace OperatorsDLL
         }
     }
 
-    public class Tangent : IFunction
+    public class Tangent : IOneArgFunction
     {
-        public uint Weight => 4;
+        public uint Weight => 5;
 
         public decimal CalculateFunction(decimal a)
         {
@@ -108,9 +125,9 @@ namespace OperatorsDLL
         }
     }
 
-    public class Cotangent : IFunction
+    public class Cotangent : IOneArgFunction
     {
-        public uint Weight => 4;
+        public uint Weight => 5;
 
         public decimal CalculateFunction(decimal a)
         {
@@ -124,7 +141,7 @@ namespace OperatorsDLL
     }
     public class RightBracket : IOperator
     {
-        public uint Weight => 5;
+        public uint Weight => 6;
     }
     public static class OperatorFactory
     {
@@ -197,22 +214,32 @@ namespace OperatorsDLL
                 }
             }
         }
-        public static IFunction ToFunction(this string s)
+        public static IOperator ToFunction(this string s)
         {
             switch (s)
             {
                 case "sin":
+                case "sinus":
                     return OperatorFactory.Create<Sinus>();
                 case "cos":
+                case "cosinus":
                     return OperatorFactory.Create<Cosinus>();
-                case "tag":
+                case "tangent":
+                case "tan":
                 case "tg":
                     return OperatorFactory.Create<Tangent>();
+                case "cotangent":
                 case "ctg":
                 case "cot":
                     return OperatorFactory.Create<Cotangent>();
+                case "PI":
+                case "pi":
+                    return OperatorFactory.Create<Pi>();
+                case "E":
+                case "e":
+                    return OperatorFactory.Create<EulersNumber>();
                 default:
-                    return (IFunction)OperatorFactory.Create<Default>();
+                    return OperatorFactory.Create<Default>();
             }
         }
     }
