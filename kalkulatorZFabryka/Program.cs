@@ -36,17 +36,25 @@ namespace calculator
                 }
                 else if (char.IsLetter(s[i]))
                 {
-                    operatorStack.Push(OperatorParser.ToFunction(s.ReadFunction(ref i)));
+                    var token = OperatorParser.ToFunction(s.ReadFunction(ref i));
+                    if(token is IConstant)
+                    {
+                        var constant = (IConstant)token;
+                        rpn.Add(constant.Value);
+                    }
+                    else
+                    operatorStack.Push(token);
                 }
                 else if(!char.IsWhiteSpace(s[i]) && s[i] != '.')
                 {
+                    var token = s.ToOperator(i);
                     while (operatorStack.Count != 0 &&
                           operatorStack.Peek().GetType() != typeof(LeftBracket) &&
-                          s.ToOperator(i).ComparePriority(operatorStack.Peek()))
+                          token.ComparePriority(operatorStack.Peek()))
                     {
                         rpn.Add(operatorStack.Pop());
                     }
-                    operatorStack.Push(s.ToOperator(i));
+                    operatorStack.Push(token);
                 }
             }
             while (operatorStack.Count != 0)
@@ -73,9 +81,9 @@ namespace calculator
                     var b = numberStack.Pop();
                     numberStack.Push(Operator.CalculateOperator(b, a));
                 }
-                if(token is IFunction)
+                if(token is IOneArgFunction)
                 {
-                    var Function = (IFunction)token;
+                    var Function = (IOneArgFunction)token;
                     var a = numberStack.Pop();
                     numberStack.Push(Function.CalculateFunction(a));
                 }
