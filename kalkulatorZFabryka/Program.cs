@@ -17,7 +17,9 @@ namespace calculator
             Stack<IOperator> operatorStack = new Stack<IOperator>();
             for(int i = 0; i<s.Length; i++)
             {
-                if (char.IsDigit(s[i]) || (i==0 && s[i] == '-'))
+                if (char.IsDigit(s[i]) ||
+                   (i == 0 && s[i] == '-' && char.IsDigit(s[i + 1])) ||
+                   (i >= 1 && s[i] == '-' && s[i - 1] == '(') && char.IsDigit(s[i + 1]))
                 {
                     rpn.Add(s.ReadNumber(ref i));
 
@@ -25,11 +27,6 @@ namespace calculator
                 else if (s[i] == '(')
                 {
                     operatorStack.Push(OperatorFactory.Create<LeftBracket>());
-                    if (s[i + 1] == '-')
-                    {
-                        i++;
-                        rpn.Add(s.ReadNumber(ref i));
-                    }
                 }
                 else if (s[i] == ')')
                 {
@@ -41,16 +38,25 @@ namespace calculator
                 }
                 else if (char.IsLetter(s[i]))
                 {
+                    bool negative = false;
+                    if ((i == 1 && s[i - 1] == '-') || (i > 1 && s[i - 1] == '-' && s[i - 2] == '(')) negative = true;
+
                     var token = OperatorParser.ToFunction(s.ReadFunction(ref i));
-                    if(token is IConstant)
+                    if (token is IConstant)
                     {
                         var constant = (IConstant)token;
-                        rpn.Add(constant.Value);
+                        rpn.Add(negative ? constant.Value * -1 : constant.Value);
                     }
                     else
-                    operatorStack.Push(token);
+                    {
+                        var func = (IFunction)token;
+                        if (negative) func.isNegative = true;
+                        operatorStack.Push(func);
+                    }
                 }
-                else if(!char.IsWhiteSpace(s[i]) && s[i] != '.')
+                else if ((!char.IsWhiteSpace(s[i]) && s[i] != '.') &&
+                !(i == 0 && s[i] == '-') &&
+                !(i >= 1 && s[i] == '-' && s[i - 1] == '('))
                 {
                     var token = s.ToOperator(i);
                     while (operatorStack.Count != 0 &&
@@ -81,16 +87,16 @@ namespace calculator
                 }
                 if(token is IExecutableOperator)
                 {
-                    var Operator = (IExecutableOperator)token;
+                    var oper = (IExecutableOperator)token;
                     var a = numberStack.Pop();
                     var b = numberStack.Pop();
-                    numberStack.Push(Operator.CalculateOperator(b, a));
+                    numberStack.Push(oper.CalculateOperator(b, a));
                 }
                 if(token is IOneArgFunction)
                 {
-                    var Function = (IOneArgFunction)token;
+                    var function = (IOneArgFunction)token;
                     var a = numberStack.Pop();
-                    numberStack.Push(Function.CalculateFunction(a));
+                    numberStack.Push(function.isNegative ? function.CalculateFunction(a)*-1 : function.CalculateFunction(a));
                 }
             }
             return numberStack.Pop();

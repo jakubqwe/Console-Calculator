@@ -15,12 +15,17 @@ namespace OperatorsDLL
         decimal CalculateOperator(decimal a, decimal b);
 
     }
-    public interface IOneArgFunction : IOperator
+    public interface IFunction : IOperator
+    {
+        bool isNegative { get; set; }
+    }
+    public interface IOneArgFunction : IFunction
     {
         decimal CalculateFunction(decimal a);
     }
 
-    public interface IConstant : IOperator
+
+    public interface IConstant : IFunction
     {
         decimal Value { get; }
     }
@@ -32,11 +37,13 @@ namespace OperatorsDLL
 
     public class Pi : IConstant
     {
+        public bool isNegative { get; set; } = false;
         public uint Weight => 4;
         public decimal Value => 3.1415926535897932384626433832m;
     }
     public class EulersNumber : IConstant
     {
+        public bool isNegative { get; set; } = false;
         public uint Weight => 4;
         public decimal Value => (decimal)Math.E;
     }
@@ -100,6 +107,8 @@ namespace OperatorsDLL
     {
         public uint Weight => 5;
 
+        public bool isNegative { get; set; } = false;
+
         public decimal CalculateFunction(decimal a)
         {
             return (decimal)Math.Sin((double)a);
@@ -108,7 +117,7 @@ namespace OperatorsDLL
     public class Cosinus : IOneArgFunction
     {
         public uint Weight => 5;
-
+        public bool isNegative { get; set; } = false;
         public decimal CalculateFunction(decimal a)
         {
             return (decimal)Math.Cos((double)a);
@@ -118,7 +127,7 @@ namespace OperatorsDLL
     public class Tangent : IOneArgFunction
     {
         public uint Weight => 5;
-
+        public bool isNegative { get; set; } = false;
         public decimal CalculateFunction(decimal a)
         {
             return (decimal)Math.Tan((double)a);
@@ -128,7 +137,7 @@ namespace OperatorsDLL
     public class Cotangent : IOneArgFunction
     {
         public uint Weight => 5;
-
+        public bool isNegative { get; set; } = false;
         public decimal CalculateFunction(decimal a)
         {
             return 1/(decimal)Math.Tan((double)a);
