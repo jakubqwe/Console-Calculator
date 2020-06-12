@@ -6,6 +6,7 @@ A simple calculator written in c# using reverse polish notation.
 
 # Functions:
   One argument: 
+  
   sin/sinus - sinus
   
   cos/cosinus - cosinus
