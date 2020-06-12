@@ -17,7 +17,7 @@ namespace calculator
             Stack<IOperator> operatorStack = new Stack<IOperator>();
             for(int i = 0; i<s.Length; i++)
             {
-                if (char.IsDigit(s[i]))
+                if (char.IsDigit(s[i]) || (i==0 && s[i] == '-'))
                 {
                     rpn.Add(s.ReadNumber(ref i));
 
@@ -25,6 +25,11 @@ namespace calculator
                 else if (s[i] == '(')
                 {
                     operatorStack.Push(OperatorFactory.Create<LeftBracket>());
+                    if (s[i + 1] == '-')
+                    {
+                        i++;
+                        rpn.Add(s.ReadNumber(ref i));
+                    }
                 }
                 else if (s[i] == ')')
                 {

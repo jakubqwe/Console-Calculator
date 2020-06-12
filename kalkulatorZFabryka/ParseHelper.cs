@@ -13,11 +13,11 @@ namespace calculator
             int i;
 
 
-            for (i = startPos; i != s.Length && (char.IsDigit(s[i]) || s[i] == '.'); i++) ;
+            for (i = startPos; i != s.Length && (char.IsDigit(s[i]) || s[i] == '.' || (i==startPos && s[i]=='-')); i++) ;
 
-            var liczba = s.Substring(startPos, i - startPos);
+            var num = s.Substring(startPos, i - startPos);
             startPos += i - startPos - 1;
-            return decimal.Parse(liczba);
+            return decimal.Parse(num);
         }
         public static string ReadFunction(this string s, ref int startPos)
         {
