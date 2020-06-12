@@ -143,6 +143,15 @@ namespace OperatorsDLL
             return 1/(decimal)Math.Tan((double)a);
         }
     }
+    public class DegToRad : IOneArgFunction
+    {
+        public uint Weight => 5;
+        public bool isNegative { get; set; } = false;
+        public decimal CalculateFunction(decimal a)
+        {
+            return a * (3.1415926535897932384626433832m / 180m);
+        }
+    }
 
     public class LeftBracket : IOperator
     {
@@ -247,6 +256,8 @@ namespace OperatorsDLL
                 case "E":
                 case "e":
                     return OperatorFactory.Create<EulersNumber>();
+                case "deg":
+                    return OperatorFactory.Create<DegToRad>();
                 default:
                     return OperatorFactory.Create<Default>();
             }
